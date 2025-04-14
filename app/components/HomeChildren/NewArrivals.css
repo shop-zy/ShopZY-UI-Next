@@ -1,0 +1,28 @@
+.new-arrival-icon {
+  width:200px !important;
+  height:200px !important;
+}
+
+.card-box {
+  display: flex;
+  gap: 2rem;
+  align-items: "center";
+  flex-wrap: wrap;
+  padding: 0;
+  margin: 0;
+  margin-top:1rem;
+}
+
+.card-content {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center;
+}
+
+.card-details {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100% !important;
+  /* gap: 0.5rem; */
+}

@@ -1,0 +1,50 @@
+#footer-section {
+  background: #393D46;
+  padding-bottom: 2rem;
+}
+
+#footer-content-section {
+  display: grid;
+  grid-template-columns: 30% 20% 15% 15% 20%;
+  gap: 1rem;
+  color: #fff;
+  padding: 4rem 4.5rem;
+  padding-bottom: 2rem;
+}
+
+#newsletter-heading, #product-links-heading {
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.newsletter-div, .product-links-div {
+  display: flex;
+  flex-direction: column;
+  padding-right: 2rem;
+}
+
+.newsletter-content {
+  font-size: 18px;
+  font-weight: normal;
+}
+
+.product-links-div {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+.product-links {
+  text-decoration: none !important ;
+  color: #fff !important;
+}
+
+.social-icon-div {
+  display: flex;
+  gap: 1rem;
+}
+
+#copy-right-text {
+  color: #fff;
+  text-align: center;
+  margin-top: 2rem;
+}
