@@ -22,7 +22,7 @@ function Pagination(props: PaginationProps) {
 	const { index, dots } = props;
 
 	const handleClick = (
-		event: React.MouseEvent<HTMLDivElement>,
+		event: React.MouseEvent<HTMLButtonElement>,
 		index: number
 	) => {
 		props.onChangeIndex(index);
