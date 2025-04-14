@@ -25,11 +25,11 @@ const styles = {
 interface PaginationDotProps {
 	index: number;
 	active: boolean;
-	onClick: (event: React.MouseEvent<HTMLDivElement>, index: number) => void;
+	onClick: (event: React.MouseEvent<HTMLButtonElement>, index: number) => void;
 }
 
 function PaginationDot(props: PaginationDotProps) {
-	const handleClick = (event: any) => {
+	const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
 		props.onClick(event, props.index);
 	};
 
@@ -44,7 +44,11 @@ function PaginationDot(props: PaginationDotProps) {
 	}
 
 	return (
-		<button type="button" style={styles.root} onClick={handleClick}>
+		<button
+			type="button"
+			style={styles.root}
+			onClick={(event) => handleClick(event)}
+		>
 			<div style={styleDot} />
 		</button>
 	);

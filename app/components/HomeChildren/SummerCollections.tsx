@@ -1,4 +1,3 @@
-import { Button, Paper } from "@mui/material";
 import React from "react";
 import Carousel from "react-material-ui-carousel";
 import { Box, Card, CardCover, CardContent, Typography } from "@mui/joy";

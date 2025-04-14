@@ -1,15 +1,13 @@
 "use client";
 import { Stack, Typography } from "@mui/material";
 import React from "react";
-import Slide from "./components/layout/Slide";
-import { Card, CardContent, AspectRatio } from "@mui/joy";
+// import Slide from "./components/layout/Slide";
+import { Card } from "@mui/joy";
 
 // custom CSS
 import styles from "./home.module.css";
 
-// Custom Icons
-import ShoesIcon from "../public/img/Vectorcategory-shoe-test.svg";
-import JacketIcon from "../public/img/category-jacket-img.svg";
+// Custom Components
 import NewArrivals from "./components/HomeChildren/NewArrivals";
 import SummerCollections from "./components/HomeChildren/SummerCollections";
 import Footer from "./components/layout/Footer";

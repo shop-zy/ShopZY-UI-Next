@@ -16,7 +16,7 @@ import AdbIcon from "@mui/icons-material/Adb";
 import ShoppingCartOutlinedIcon from "@mui/icons-material/ShoppingCartOutlined";
 import { Search } from "@mui/icons-material";
 import Link from "next/link";
-import axios from "axios";
+// import axios from "axios";
 import { NoSsr } from "@mui/material";
 
 import styles from "./Navbar.module.css";
