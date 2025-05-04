@@ -4,6 +4,8 @@ on:
   pull_request:
     branches:
       - dev
+    # types:
+    #   - synchronize
 
 jobs:
   update-version:
@@ -31,11 +33,11 @@ jobs:
           IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT_VERSION"
 
           # Determine the type of branch and update the version
-          if [[ "$BRANCH_NAME" == *"feature"* ]]; then
-            MINOR=$((MINOR + 1)) # Increment the minor version for feature branches
+          if [[ "$BRANCH_NAME" == *"major"* ]]; then
+            MINOR=$((MINOR + 1)) # Increment the minor version for major branches
             PATCH=0 # Reset patch to 0
-          elif [[ "$BRANCH_NAME" == *"bug"* ]]; then
-            PATCH=$((PATCH + 1)) # Increment the patch version for bug branches
+          elif [[ "$BRANCH_NAME" == *"minor"* ]]; then
+            PATCH=$((PATCH + 1)) # Increment the patch version for minor branches
           fi
 
           # Construct the new version
