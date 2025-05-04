@@ -10,6 +10,8 @@ on:
 jobs:
   update-version:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write # Grant write access to the repository contents
 
     steps:
       # Step 1: Checkout the repository
