@@ -56,13 +56,15 @@ jobs:
 
       # Step 3: Commit and push the changes
       - name: Commit and push changes
+        env:
+          PAT: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
         run: |
           git config --global user.name "GitHub Actions"
           git config --global user.email "actions@github.com"
           git checkout dev # Ensure we are on the `dev` branch
           git add package.json
           git commit -m "Update version to $NEW_VERSION based on branch name: ${{ github.head_ref }}"
-          git push
+          git push https://x-access-token:${PAT}@github.com/${{ github.repository }} HEAD:dev
 
       # Step 4: Add labels to the pull request
       - name: Add labels to the pull request
