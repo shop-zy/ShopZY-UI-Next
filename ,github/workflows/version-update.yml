@@ -1,0 +1,65 @@
+name: Update Package Version on PR Sync
+
+on:
+  pull_request:
+    branches:
+      - dev
+    types:
+      - synchronize
+
+jobs:
+  update-version:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Checkout the repository
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Step 2: Set up Node.js
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "16" # Specify the Node.js version
+
+      # Step 3: Install dependencies
+      - name: Install dependencies
+        run: npm install
+
+      # Step 4: Update package.json version based on branch name
+      - name: Update package.json version
+        run: |
+          # Extract the branch name
+          BRANCH_NAME="${{ github.head_ref }}"
+          echo "Branch name: $BRANCH_NAME"
+
+          # Read the current version from package.json
+          CURRENT_VERSION=$(jq -r ".version" package.json)
+          echo "Current version: $CURRENT_VERSION"
+
+          # Split the version into major, minor, and patch
+          IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT_VERSION"
+
+          # Determine the type of branch and update the version
+          if [[ "$BRANCH_NAME" == *"feature"* ]]; then
+            MINOR=$((MINOR + 1)) # Increment the minor version for feature branches
+            PATCH=0 # Reset patch to 0
+          elif [[ "$BRANCH_NAME" == *"bug"* ]]; then
+            PATCH=$((PATCH + 1)) # Increment the patch version for bug branches
+          fi
+
+          # Construct the new version
+          NEW_VERSION="$MAJOR.$MINOR.$PATCH"
+          echo "New version: $NEW_VERSION"
+
+          # Update the version in package.json
+          jq ".version = \"$NEW_VERSION\"" package.json > temp.json && mv temp.json package.json
+
+      # Step 5: Commit and push the changes
+      - name: Commit and push changes
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+          git add package.json
+          git commit -m "Update version to $NEW_VERSION based on branch name: ${{ github.head_ref }}"
+          git push
