@@ -12,6 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write # Grant write access to the repository contents
+      pull-requests: write # Grant write access to pull requests
 
     steps:
       # Step 1: Checkout the repository
@@ -22,6 +23,7 @@ jobs:
 
       # Step 2: Update package.json version based on branch name
       - name: Update package.json version
+        id: update_version # Add an ID to reference this step's outputs
         run: |
           # Extract the branch name
           BRANCH_NAME="${{ github.head_ref }}"
@@ -49,6 +51,9 @@ jobs:
           # Update the version in package.json
           jq ".version = \"$NEW_VERSION\"" package.json > temp.json && mv temp.json package.json
 
+          # Output the new version for use in later steps
+          echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
+
       # Step 3: Commit and push the changes
       - name: Commit and push changes
         run: |
@@ -58,3 +63,29 @@ jobs:
           git add package.json
           git commit -m "Update version to $NEW_VERSION based on branch name: ${{ github.head_ref }}"
           git push
+
+      # Step 4: Add labels to the pull request
+      - name: Add labels to the pull request
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const branchName = context.payload.pull_request.head.ref;
+            const newVersion = process.env.NEW_VERSION;
+            const labels = [];
+
+            // Determine labels based on branch name
+            if (branchName.includes("major")) {
+              labels.push(`major-${newVersion}`);
+            } else if (branchName.includes("minor")) {
+              labels.push(`minor-${newVersion}`);
+            } else {
+              labels.push(`other-${newVersion}`);
+            }
+
+            // Add labels to the pull request
+            await github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.pull_request.number,
+              labels: labels,
+            });
