@@ -10,7 +10,7 @@ import ArrowOutwardIcon from "@mui/icons-material/ArrowOutward";
 import ShoppingCartOutlinedIcon from "@mui/icons-material/ShoppingCartOutlined";
 import React, { useState } from "react";
 
-import DeleteIcon from "../../../assets/img/delete-icon.svg";
+import DeleteIcon from "../../../../public/img/delete-icon.svg";
 
 function WishList() {
 	const featuredProductArray = [
