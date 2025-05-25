@@ -2,6 +2,9 @@ import { Button, TextField, Typography } from "@mui/material";
 import Link from "next/link";
 import React from "react";
 
+// Custom Components Imports
+import GoogleLoginButton from "@/app/components/GoogleLoginButton/GoogleLoginButton";
+
 function Login() {
 	return (
 		<section className="flex flex-row items-center justify-center h-screen bg-gray-100">
@@ -54,12 +57,7 @@ function Login() {
 				>
 					Log In
 				</Button>
-				<Button
-					variant="outlined"
-					className="!capitalize !mt-4 !text-black  !border-black hover:bg-gray-200"
-				>
-					Log In with Google
-				</Button>
+				<GoogleLoginButton />
 				<div className="mt-4">
 					<Typography variant="body1" className="text-center mt-4 !text-base">
 						{"Don't"} have an account? {<Link href="/register">Register</Link>}

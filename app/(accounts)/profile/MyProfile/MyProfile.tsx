@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Tooltip, Typography } from "@mui/material";
 import {
 	Input,
@@ -118,6 +118,25 @@ function MyProfile({ user, profile }: MyProfileProps) {
 	// 	// 	setLoading(false);
 	// 	// }, 4000);
 	// };
+
+	// useEffect(() => {
+	// 	const getUserProfile = async () => {
+	// 		try {
+	// 			const response = await AxiosInstance.get(
+	// 				`${process.env.NEXT_PUBLIC_DJANGO_API_URL}/api/`
+	// 			);
+	// 			const userProfile = response.data;
+	// 			console.log("User Profile: ", userProfile);
+	// 			setFirstName(userProfile.first_name);
+	// 			setLastName(userProfile.last_name);
+	// 			setEmail(userProfile.email);
+	// 			setAddress(userProfile.address);
+	// 		} catch (error) {
+	// 			console.error("Error fetching user profile:", error);
+	// 		}
+	// 	}
+	// 	getUserProfile();
+	// }, [])
 
 	return (
 		<div className="flex flex-1 justify-center self-center md:self-stretch">
