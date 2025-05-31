@@ -22,7 +22,7 @@ export default function AuthCallback() {
 			localStorage.setItem("access_token", token);
 			localStorage.setItem("google_access_token", googleAccessToken);
 			// localStorage.setItem("userDetails", JSON.stringify())
-			// router.push("/profile"); // Redirect to protected page
+			router.push("/profile"); // Redirect to protected page
 		}
 
 		if (error) {
