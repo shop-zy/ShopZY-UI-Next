@@ -9,6 +9,7 @@ import ExpandLess from "@mui/icons-material/ExpandLess";
 import ExpandMore from "@mui/icons-material/ExpandMore";
 import MyProfile from "./MyProfile/MyProfile";
 import BreadCrumbs from "@/app/components/layout/BreadCrumbs";
+import WishList from "./WishList/WishList";
 
 interface MenuItem {
 	title: string;
@@ -91,6 +92,7 @@ const accountsSideMenu: MenuItem[] = [
 	},
 	{
 		title: "My Wishlist",
+		component: <WishList />,
 	},
 ];
 
