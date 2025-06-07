@@ -7,6 +7,11 @@ on:
     # types:
     #   - synchronize
 
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # GitHub token for authentication
+  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }} # GitHub token for authentication
+  GITHUB_EVENT_PATH: ${{ github.event_path }} # Path to the event payload file
+
 jobs:
   update-version:
     runs-on: ubuntu-latest
@@ -64,5 +69,3 @@ jobs:
           PR_NUMBER=$(jq -r ".pull_request.number" "$GITHUB_EVENT_PATH")
           echo "Pull Request Number: $PR_NUMBER"
           gh pr edit "$PR_NUMBER" --add-label "$NEW_VERSION"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
