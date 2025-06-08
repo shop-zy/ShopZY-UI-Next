@@ -56,9 +56,9 @@ jobs:
 
           branch_name_lower=$(echo "$BRANCH_NAME" | tr '[:upper:]' '[:lower:]')
 
-          if [[ "$branch_name_lower" == *feature* ]]; then
+          if [[ "$branch_name_lower" == *major* ]]; then
             v_middle_number=$((10#${v_middle_number} + 1))
-          elif [[ "$branch_name_lower" == *bug* ]]; then
+          elif [[ "$branch_name_lower" == *minor* ]]; then
             v_last_number=$((10#${v_last_number} + 1))
           elif [[ "$branch_name_lower" == *release* ]]; then
             v_first_number=$((10#${v_first_number} + 1))
