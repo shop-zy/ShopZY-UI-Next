@@ -62,20 +62,22 @@ jobs:
           NEW_VERSION="$MAJOR.$MINOR.$PATCH"
           echo "New version: $NEW_VERSION"
 
-      # Step 3: Add version number as PR label using GitHub API
-      - name: Add version as PR label
+      # Step 3: Create or update the version label
+      - name: Create Label if it Doesnt Exist
         run: |
-          PR_NUMBER=$(jq -r ".pull_request.number" "$GITHUB_EVENT_PATH")
-          echo "Pull Request Number: $PR_NUMBER"
-          echo "Adding label: $NEW_VERSION"
+          label_exists=$(gh label list --repo ${{ github.repository }} | grep -qw "${{ env.NEW_VERSION }}" || echo "not_found")
+          if [[ "$label_exists" == "not_found" ]]; then
+            echo "Label does not exist. Creating label: ${{ env.NEW_VERSION }}"
+            gh label create "${{ env.NEW_VERSION }}" --description "Automatically generated label" --force
+          else
+            echo "Label already exists: ${{ env.NEW_VERSION }}"
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-
-          # GitHub API endpoint to add labels to a PR
-          API_URL="https://api.github.com/repos/${{ github.repository }}/issues/$PR_NUMBER/labels"
-
-          # Add the label using the GitHub API
-          curl -X POST \
-            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-            -H "Accept: application/vnd.github.v3+json" \
-            -d "{\"labels\": [\"$NEW_VERSION\"]}" \
-            "$API_URL"
+      # Step 4: Add the new version label to the PR
+      - name: Set New Label
+        uses: actions-ecosystem/action-add-labels@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          labels: ${{ env.NEW_VERSION }}
