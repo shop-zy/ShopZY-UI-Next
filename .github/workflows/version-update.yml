@@ -1,4 +1,4 @@
-name: Update Package Version on PR Sync
+name: Update Semantic Version on PR Sync
 
 on:
   pull_request:
@@ -9,9 +9,8 @@ on:
       - opened
 
 env:
-  DEFAULT_VERSION: "r_1_0_0_v_0_0_0"
-  FINAL_VERSION: "r_2_0_0_v_0_0_0"
-  VERSION_PATTERN: 'r_\d+_\d+_\d+_v_\d+_\d+_\d+'
+  DEFAULT_VERSION: "1.0.0"
+  VERSION_PATTERN: '^[0-9]+\.[0-9]+\.[0-9]+$'
 
 jobs:
   update-version:
@@ -33,12 +32,12 @@ jobs:
           BRANCH_NAME="${{ github.head_ref }}"
           echo "Branch name: $BRANCH_NAME"
 
-          # Fetch all labels from all PRs and extract version-like labels
+          # Fetch all PR labels that match semantic version pattern
           all_labels=$(gh pr list --state all --json labels --jq '.[].labels[].name' | grep -E '${{ env.VERSION_PATTERN }}' || true)
 
           if [[ -n "$all_labels" ]]; then
-            echo "$all_labels" | sort -V | tee sorted_labels.txt
-            LATEST_VERSION=$(tail -n 1 sorted_labels.txt)
+            echo "$all_labels" | sort -V | tee sorted_versions.txt
+            LATEST_VERSION=$(tail -n 1 sorted_versions.txt)
           else
             echo "No matching version labels found. Using default."
             LATEST_VERSION="${{ env.DEFAULT_VERSION }}"
@@ -46,32 +45,25 @@ jobs:
 
           echo "Latest version: $LATEST_VERSION"
 
-          # Parse version components
-          r_number=$(echo "$LATEST_VERSION" | cut -d '_' -f2)
-          middle_number=$(echo "$LATEST_VERSION" | cut -d '_' -f3)
-          last_number=$(echo "$LATEST_VERSION" | cut -d '_' -f4)
-          v_first_number=$(echo "$LATEST_VERSION" | cut -d '_' -f6)
-          v_middle_number=$(echo "$LATEST_VERSION" | cut -d '_' -f7)
-          v_last_number=$(echo "$LATEST_VERSION" | cut -d '_' -f8)
+          # Split version into components
+          IFS='.' read -r MAJOR MINOR PATCH <<< "$LATEST_VERSION"
 
-          branch_name_lower=$(echo "$BRANCH_NAME" | tr '[:upper:]' '[:lower:]')
+          # Normalize branch name
+          BRANCH_NAME_LOWER=$(echo "$BRANCH_NAME" | tr '[:upper:]' '[:lower:]')
 
-          if [[ "$branch_name_lower" == *major* ]]; then
-            v_middle_number=$((10#${v_middle_number} + 1))
-          elif [[ "$branch_name_lower" == *minor* ]]; then
-            v_last_number=$((10#${v_last_number} + 1))
-          elif [[ "$branch_name_lower" == *release* ]]; then
-            v_first_number=$((10#${v_first_number} + 1))
-            v_middle_number=0
-            v_last_number=0
-          elif [[ "$branch_name_lower" == *final* ]]; then
-            NEW_VERSION="${{ env.FINAL_VERSION }}"
-            echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
-            exit 0
+          # Versioning logic based on branch type
+          if [[ "$BRANCH_NAME_LOWER" == *major* ]]; then
+            MAJOR=$((MAJOR + 1))
+            MINOR=0
+            PATCH=0
+          elif [[ "$BRANCH_NAME_LOWER" == *minor* ]]; then
+            MINOR=$((MINOR + 1))
+            PATCH=0
+          else
+            PATCH=$((PATCH + 1))
           fi
 
-          # Construct new version
-          NEW_VERSION="r_${r_number}_${middle_number}_${last_number}_v_${v_first_number}_${v_middle_number}_${v_last_number}"
+          NEW_VERSION="${MAJOR}.${MINOR}.${PATCH}"
           echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
 
         env:
