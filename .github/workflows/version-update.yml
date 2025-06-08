@@ -9,7 +9,6 @@ on:
 
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # GitHub token for authentication
-  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }} # GitHub token for authentication
   GITHUB_EVENT_PATH: ${{ github.event_path }} # Path to the event payload file
 
 jobs:
@@ -63,9 +62,20 @@ jobs:
           NEW_VERSION="$MAJOR.$MINOR.$PATCH"
           echo "New version: $NEW_VERSION"
 
-      # Step 3: Add version number as PR label
+      # Step 3: Add version number as PR label using GitHub API
       - name: Add version as PR label
         run: |
           PR_NUMBER=$(jq -r ".pull_request.number" "$GITHUB_EVENT_PATH")
           echo "Pull Request Number: $PR_NUMBER"
-          gh pr edit "$PR_NUMBER" --add-label "$NEW_VERSION"
+          echo "Adding label: $NEW_VERSION"
+
+
+          # GitHub API endpoint to add labels to a PR
+          API_URL="https://api.github.com/repos/${{ github.repository }}/issues/$PR_NUMBER/labels"
+
+          # Add the label using the GitHub API
+          curl -X POST \
+            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Accept: application/vnd.github.v3+json" \
+            -d "{\"labels\": [\"$NEW_VERSION\"]}" \
+            "$API_URL"
