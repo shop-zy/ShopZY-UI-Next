@@ -1,71 +1,88 @@
-name: Update Package Version on PR Sync
+name: Update Semantic Version on PR Sync
 
 on:
   pull_request:
     branches:
       - dev
-    # types:
-    #   - synchronize
+    types:
+      - synchronize
+      - opened
 
 env:
-  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # GitHub token for authentication
-  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }} # GitHub token for authentication
-  GITHUB_EVENT_PATH: ${{ github.event_path }} # Path to the event payload file
+  DEFAULT_VERSION: "1.0.0"
+  VERSION_PATTERN: '^[0-9]+\.[0-9]+\.[0-9]+$'
 
 jobs:
   update-version:
     runs-on: ubuntu-latest
     permissions:
-      contents: write # Grant write access to the repository contents
-      pull-requests: write # Grant write access to pull requests
+      contents: write
+      pull-requests: write
 
     steps:
-      # Step 1: Checkout the repository
-      - name: Checkout code
+      - name: Checkout Code
         uses: actions/checkout@v3
-        with:
-          ref: dev # Ensure the `dev` branch is checked out
 
-      # Step 2: Update version based on branch name
-      - name: Update version
+      - name: Install jq
+        run: sudo apt-get install -y jq
+
+      - name: Fetch and Parse Previous Version Labels
+        id: versioning
         run: |
-          # Extract the branch name
           BRANCH_NAME="${{ github.head_ref }}"
           echo "Branch name: $BRANCH_NAME"
 
-          # Default version if no previous label is found
-          DEFAULT_VERSION="0.1.0"
+          # Fetch all PR labels that match semantic version pattern
+          all_labels=$(gh pr list --state all --json labels --jq '.[].labels[].name' | grep -E '${{ env.VERSION_PATTERN }}' || true)
 
-          # Fetch the PR number
-          PR_NUMBER=$(jq -r ".pull_request.number" "$GITHUB_EVENT_PATH")
-          echo "Pull Request Number: $PR_NUMBER"
-
-          # Fetch the labels of the PR
-          LABELS=$(gh pr view "$PR_NUMBER" --json labels --jq '.labels[].name')
-          echo "Labels: $LABELS"
-
-          # Extract the version label if it exists
-          PREVIOUS_VERSION=$(echo "$LABELS" | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$' || echo "$DEFAULT_VERSION")
-          echo "Previous version: $PREVIOUS_VERSION"
-
-          # Split the version into major, minor, and patch
-          IFS='.' read -r MAJOR MINOR PATCH <<< "$PREVIOUS_VERSION"
-
-          # Determine the type of branch and update the version
-          if [[ "$BRANCH_NAME" == *"major"* ]]; then
-            MINOR=$((MINOR + 1)) # Increment the minor version for major branches
-            PATCH=0 # Reset patch to 0
-          elif [[ "$BRANCH_NAME" == *"minor"* ]]; then
-            PATCH=$((PATCH + 1)) # Increment the patch version for minor branches
+          if [[ -n "$all_labels" ]]; then
+            echo "$all_labels" | sort -V | tee sorted_versions.txt
+            LATEST_VERSION=$(tail -n 1 sorted_versions.txt)
+          else
+            echo "No matching version labels found. Using default."
+            LATEST_VERSION="${{ env.DEFAULT_VERSION }}"
           fi
 
-          # Construct the new version
-          NEW_VERSION="$MAJOR.$MINOR.$PATCH"
-          echo "New version: $NEW_VERSION"
+          echo "Latest version: $LATEST_VERSION"
 
-      # Step 3: Add version number as PR label
-      - name: Add version as PR label
+          # Split version into components
+          IFS='.' read -r MAJOR MINOR PATCH <<< "$LATEST_VERSION"
+
+          # Normalize branch name
+          BRANCH_NAME_LOWER=$(echo "$BRANCH_NAME" | tr '[:upper:]' '[:lower:]')
+
+          # Versioning logic based on branch type
+          if [[ "$BRANCH_NAME_LOWER" == *major* ]]; then
+            MAJOR=$((MAJOR + 1))
+            MINOR=0
+            PATCH=0
+          elif [[ "$BRANCH_NAME_LOWER" == *minor* ]]; then
+            MINOR=$((MINOR + 1))
+            PATCH=0
+          else
+            PATCH=$((PATCH + 1))
+          fi
+
+          NEW_VERSION="${MAJOR}.${MINOR}.${PATCH}"
+          echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
+
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create Label if it Doesn't Exist
         run: |
-          PR_NUMBER=$(jq -r ".pull_request.number" "$GITHUB_EVENT_PATH")
-          echo "Pull Request Number: $PR_NUMBER"
-          gh pr edit "$PR_NUMBER" --add-label "$NEW_VERSION"
+          label_exists=$(gh label list --repo ${{ github.repository }} | grep -qw "${{ env.NEW_VERSION }}" || echo "not_found")
+          if [[ "$label_exists" == "not_found" ]]; then
+            echo "Creating label: ${{ env.NEW_VERSION }}"
+            gh label create "${{ env.NEW_VERSION }}" --description "Auto-generated version label" --force
+          else
+            echo "Label already exists: ${{ env.NEW_VERSION }}"
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Add Label to PR
+        uses: actions-ecosystem/action-add-labels@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          labels: ${{ env.NEW_VERSION }}
