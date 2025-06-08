@@ -4,6 +4,7 @@ on:
   pull_request:
     branches:
       - dev
+      - prod
     types:
       - synchronize
       - opened
@@ -11,6 +12,7 @@ on:
 env:
   DEFAULT_VERSION: "1.0.0"
   VERSION_PATTERN: '^[0-9]+\.[0-9]+\.[0-9]+$'
+  RELEASE_VERSION: "1.0.0" #
 
 jobs:
   update-version:
