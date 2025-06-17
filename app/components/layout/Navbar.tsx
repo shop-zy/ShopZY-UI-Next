@@ -1,21 +1,16 @@
 "use client";
-import * as React from "react";
+import React, { useState } from "react";
 import { styled, alpha } from "@mui/material/styles";
-import AppBar from "@mui/material/AppBar";
-import Box from "@mui/material/Box";
-import Toolbar from "@mui/material/Toolbar";
+import Image from "next/image";
 import IconButton from "@mui/material/IconButton";
-import Typography from "@mui/material/Typography";
 import InputBase from "@mui/material/InputBase";
 import Badge from "@mui/material/Badge";
 import MenuItem from "@mui/material/MenuItem";
 import Menu from "@mui/material/Menu";
 // import MenuIcon from "@mui/icons-material/Menu";
-import SearchIcon from "@mui/icons-material/Search";
 import AccountCircle from "@mui/icons-material/AccountCircle";
 import MailIcon from "@mui/icons-material/Mail";
 import NotificationsIcon from "@mui/icons-material/Notifications";
-import MoreIcon from "@mui/icons-material/MoreVert";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
@@ -86,6 +81,7 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
 
 export default function PrimarySearchAppBar() {
 	const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+	const [userMenuOpen, setUserMenuOpen] = useState(false);
 	const [mobileMoreAnchorEl, setMobileMoreAnchorEl] =
 		React.useState<null | HTMLElement>(null);
 	const router = useRouter();
@@ -191,89 +187,130 @@ export default function PrimarySearchAppBar() {
 	);
 
 	return (
-		<Box sx={{ flexGrow: 1 }}>
-			<AppBar sx={{ backgroundColor: "#fff", color: "#000" }} position="static">
-				<Toolbar>
-					<Box className="flex flex-row items-center justify-between w-full">
-						<Typography
-							variant="h6"
-							noWrap
-							component="div"
-							sx={{ display: { xs: "none", sm: "block" } }}
-						>
-							ShopZY
-						</Typography>
-						<div className="flex flex-row items-center ml-10">
-							<MenuItem>
-								<Link href={"/"}>Home</Link>
-							</MenuItem>
-							<MenuItem>
-								<Link href={"/about"}>About</Link>
-							</MenuItem>
-							<MenuItem>
-								<Link href={"/contact"}>Contact</Link>
-							</MenuItem>
-							<MenuItem>
-								<Link href={"/register"}>Sign Up</Link>
-							</MenuItem>
+		// {/* Header */}
+		<header className="flex items-center justify-between px-[135px] py-4 border-b border-overlay-medium">
+			<Link href="/" className="text-2xl font-inter font-bold text-primary">
+				Exclusive
+			</Link>
+			<nav className="flex items-center gap-12">
+				<div className="flex items-center">
+					<Link href="/" className="text-base font-poppins text-primary">
+						Home
+					</Link>
+					<Image
+						src="/img/img_underline.svg"
+						alt="Active"
+						width={48}
+						height={1}
+						className="mt-6"
+					/>
+				</div>
+				<Link href="/contact" className="text-base font-poppins text-primary">
+					Contact
+				</Link>
+				<Link href="/about" className="text-base font-poppins text-primary">
+					About
+				</Link>
+				<Link href="/signup" className="text-base font-poppins text-primary">
+					Sign Up
+				</Link>
+			</nav>
+			<div className="flex items-center gap-6">
+				<div className="flex items-center bg-secondary rounded px-5 py-2 w-[243px]">
+					<input
+						type="text"
+						placeholder="What are you looking for?"
+						className="flex-1 bg-transparent text-xs font-poppins text-secondary outline-none"
+					/>
+					<Image
+						src="/img/img_search.svg"
+						alt="Search"
+						width={24}
+						height={24}
+					/>
+				</div>
+				<Image
+					src="/img/img_wishlist.svg"
+					alt="Wishlist"
+					width={32}
+					height={32}
+				/>
+				<div className="relative">
+					<Image src="/img/img_cart1.svg" alt="Cart" width={24} height={24} />
+					<div className="absolute -top-2 -right-2 bg-error text-light text-xs rounded-full w-4 h-4 flex items-center justify-center">
+						2
+					</div>
+				</div>
+				<div className="relative">
+					<button
+						onClick={() => setUserMenuOpen(!userMenuOpen)}
+						className="w-8 h-8 rounded-full overflow-hidden"
+					>
+						<Image src="/img/img_user.svg" alt="User" width={32} height={32} />
+					</button>
+					{userMenuOpen && (
+						<div className="absolute top-12 right-0 bg-overlay-light rounded shadow-lg w-[224px] p-4">
+							<div className="flex flex-col gap-3">
+								<div className="flex items-center gap-4">
+									<Image
+										src="/img/img_user_gray_50.svg"
+										alt="Account"
+										width={32}
+										height={32}
+									/>
+									<span className="text-sm font-poppins text-light">
+										Manage My Account
+									</span>
+								</div>
+								<div className="flex items-center gap-4">
+									<Image
+										src="/img/img_iconmallbag.svg"
+										alt="Orders"
+										width={24}
+										height={24}
+									/>
+									<span className="text-sm font-poppins text-light">
+										My Order
+									</span>
+								</div>
+								<div className="flex items-center gap-4">
+									<Image
+										src="/img/img_iconcancel.svg"
+										alt="Cancellations"
+										width={24}
+										height={24}
+									/>
+									<span className="text-sm font-poppins text-light">
+										My Cancellations
+									</span>
+								</div>
+								<div className="flex items-center gap-4">
+									<Image
+										src="/img/img_vector.svg"
+										alt="Reviews"
+										width={24}
+										height={24}
+									/>
+									<span className="text-sm font-poppins text-light">
+										My Reviews
+									</span>
+								</div>
+								<div className="flex items-center gap-4">
+									<Image
+										src="/img/img_iconlogout.svg"
+										alt="Logout"
+										width={24}
+										height={24}
+									/>
+									<span className="text-sm font-poppins text-light">
+										Logout
+									</span>
+								</div>
+							</div>
 						</div>
-						<Search>
-							<SearchIconWrapper>
-								<SearchIcon />
-							</SearchIconWrapper>
-							<StyledInputBase
-								placeholder="What are you looking for?"
-								inputProps={{ "aria-label": "search" }}
-							/>
-						</Search>
-						<Box sx={{ display: { xs: "none", md: "flex" } }}>
-							<IconButton
-								size="large"
-								aria-label="show 4 new mails"
-								color="inherit"
-							>
-								<Badge badgeContent={4} color="error">
-									<MailIcon />
-								</Badge>
-							</IconButton>
-							<IconButton
-								size="large"
-								aria-label="show 17 new notifications"
-								color="inherit"
-							>
-								<Badge badgeContent={17} color="error">
-									<NotificationsIcon />
-								</Badge>
-							</IconButton>
-							<IconButton
-								size="large"
-								edge="end"
-								aria-label="account of current user"
-								aria-controls={menuId}
-								aria-haspopup="true"
-								onClick={handleProfileMenuOpen}
-								color="inherit"
-							>
-								<AccountCircle />
-							</IconButton>
-						</Box>
-					</Box>
-					<Box sx={{ display: { xs: "flex", md: "none" } }}>
-						<IconButton
-							size="large"
-							aria-label="show more"
-							aria-controls={mobileMenuId}
-							aria-haspopup="true"
-							onClick={handleMobileMenuOpen}
-							color="inherit"
-						>
-							<MoreIcon />
-						</IconButton>
-					</Box>
-				</Toolbar>
-			</AppBar>
-			{renderMobileMenu}
-			{renderMenu}
-		</Box>
+					)}
+				</div>
+			</div>
+		</header>
 	);
 }

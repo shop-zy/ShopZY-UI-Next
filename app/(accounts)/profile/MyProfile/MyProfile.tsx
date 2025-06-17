@@ -10,12 +10,13 @@ import {
 	FormHelperText,
 	CircularProgress,
 } from "@mui/joy";
-// import axios from "axios";
+import axios from "axios";
 import { InfoOutlined } from "@mui/icons-material";
 import EditIcon from "@mui/icons-material/Edit";
 
 // Custom Imports
-// import { getToken } from "../../../authConfig";
+import { getToken } from "@/app/utils/authConfig";
+import { useRouter } from "next/navigation";
 
 interface MyProfileProps {
 	user: {
@@ -47,13 +48,15 @@ function MyProfile({ user, profile }: MyProfileProps) {
 	const [confirmFlag, setConfirmFlag] = useState(false);
 
 	const minLength = 12;
-	// const token = getToken();
+	const token = getToken();
 
-	// const AxiosInstance = axios.create({
-	// 	headers: {
-	// 		Authorization: `Bearer ${token}`,
-	// 	},
-	// });
+	const AxiosInstance = axios.create({
+		headers: {
+			Authorization: `Bearer ${token}`,
+		},
+	});
+
+	const router = useRouter();
 
 	// const handleSaveClick = () => {
 	// 	// Check if there are changes in profile fields
@@ -119,24 +122,30 @@ function MyProfile({ user, profile }: MyProfileProps) {
 	// 	// }, 4000);
 	// };
 
-	// useEffect(() => {
-	// 	const getUserProfile = async () => {
-	// 		try {
-	// 			const response = await AxiosInstance.get(
-	// 				`${process.env.NEXT_PUBLIC_DJANGO_API_URL}/api/`
-	// 			);
-	// 			const userProfile = response.data;
-	// 			console.log("User Profile: ", userProfile);
-	// 			setFirstName(userProfile.first_name);
-	// 			setLastName(userProfile.last_name);
-	// 			setEmail(userProfile.email);
-	// 			setAddress(userProfile.address);
-	// 		} catch (error) {
-	// 			console.error("Error fetching user profile:", error);
-	// 		}
-	// 	}
-	// 	getUserProfile();
-	// }, [])
+	useEffect(() => {
+		const getUserProfile = async () => {
+			try {
+				const response = await AxiosInstance.get(
+					`${process.env.NEXT_PUBLIC_DJANGO_BASE_URL}/accounts/user/me`
+				);
+				const userProfile = response.data;
+				console.log("User Profile: ", userProfile);
+				setFirstName(userProfile.first_name);
+				setLastName(userProfile.last_name);
+				setEmail(userProfile.email);
+			} catch (error: any) {
+				console.error("Error fetching user profile:", error);
+				if (error.response.status === 401) {
+					// Handle unauthorized access, e.g., redirect to login
+					console.error("Unauthorized access. Redirecting to login.");
+					// window.location.href = "/login"; // Adjust the path as needed
+					// router to /login
+					router.push("/login");
+				}
+			}
+		};
+		getUserProfile();
+	}, []);
 
 	return (
 		<div className="flex flex-1 justify-center self-center md:self-stretch">
