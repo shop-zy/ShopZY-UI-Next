@@ -206,7 +206,7 @@ export default function Home() {
 					<div className="flex items-center gap-4">
 						<div className="w-5 h-10 bg-[#DB4444] rounded"></div>
 						<Typography variant="h6" className="text-[#DB4444] font-semibold">
-							Today's
+							{"Today's"}
 						</Typography>
 					</div>
 				</div>
