@@ -1,11 +1,44 @@
+"use client";
 import { Button, TextField, Typography } from "@mui/material";
 import Link from "next/link";
-import React from "react";
+import React, { useRef } from "react";
 
 // Custom Components Imports
 import GoogleLoginButton from "@/app/components/GoogleLoginButton/GoogleLoginButton";
+import axios from "axios";
+import { getToken, setToken } from "@/app/utils/authConfig";
+import { useRouter } from "next/navigation";
 
 function Login() {
+	const email = useRef("");
+	const password = useRef("");
+	const router = useRouter();
+
+	const handleLogin = async () => {
+		try {
+			const reqBody = {
+				email: email.current,
+				password: password.current,
+			};
+			axios
+				.post(
+					`${process.env.NEXT_PUBLIC_DJANGO_BASE_URL}/accounts/user/login`,
+					reqBody
+				)
+				.then((response) => {
+					if (response.status === 200) {
+						// Handle successful login
+						console.log("Login successful", response.data);
+						// Redirect to home page or dashboard
+						setToken(response.data?.token);
+						router.push("/profile");
+					}
+				});
+		} catch (error) {
+			console.log("Error during login:", error);
+		}
+	};
+
 	return (
 		<section className="flex flex-row items-center justify-center h-screen bg-gray-100">
 			{/* Svg image on the left side of the register page */}
@@ -35,12 +68,16 @@ function Login() {
 					variant="standard"
 					margin="normal"
 					type="email"
+					onChange={(e) => (email.current = e.target.value)}
+					required
 				/>
 				<TextField
 					label="Password"
 					variant="standard"
 					margin="normal"
 					type="password"
+					onChange={(e) => (password.current = e.target.value)}
+					required
 				/>
 				{/* Use the btn-primary color from Tailwind config */}
 				{/* </form> */}
@@ -54,6 +91,7 @@ function Login() {
 							backgroundColor: "#E07575 !important",
 						},
 					}}
+					onClick={handleLogin}
 				>
 					Log In
 				</Button>

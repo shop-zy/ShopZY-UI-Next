@@ -13,10 +13,11 @@ import {
 import axios from "axios";
 import { InfoOutlined } from "@mui/icons-material";
 import EditIcon from "@mui/icons-material/Edit";
+import { useRouter } from "next/navigation";
 
 // Custom Imports
 import { getToken } from "@/app/utils/authConfig";
-import { useRouter } from "next/navigation";
+import AxiosInstance from "@/app/utils/axiosInstance";
 
 interface MyProfileProps {
 	user: {
@@ -33,7 +34,6 @@ interface MyProfileProps {
 }
 
 function MyProfile({ user, profile }: MyProfileProps) {
-	const [currentPassword, setCurrentPassword] = React.useState("");
 	const [newPassword, setNewPassword] = React.useState("");
 	const [confirmPassword, setConfirmPassword] = React.useState("");
 	const [firstName, setFirstName] = React.useState(user?.first_name);
@@ -41,111 +41,111 @@ function MyProfile({ user, profile }: MyProfileProps) {
 	const [email, setEmail] = React.useState(user?.email);
 	const [address, setAddress] = React.useState(profile?.address);
 	const [loading, setLoading] = useState(false);
-	// setLoading(false);
 	const [editPasswordFlag, setEditPasswordFlag] = useState(false);
-
 	const [helperFlag, setHelperFlag] = useState(false);
 	const [confirmFlag, setConfirmFlag] = useState(false);
 
-	const minLength = 12;
-	const token = getToken();
-
-	const AxiosInstance = axios.create({
-		headers: {
-			Authorization: `Bearer ${token}`,
-		},
-	});
+	const minLength = 10;
 
 	const router = useRouter();
 
-	// const handleSaveClick = () => {
-	// 	// Check if there are changes in profile fields
-	// 	const profileChanged =
-	// 		firstName !== user?.first_name ||
-	// 		lastName !== user?.last_name ||
-	// 		email !== user?.email ||
-	// 		address !== "Kingston, 5236, United State"; // Default address check
-
-	// 	// Check if passwords are being edited and validate them
-	// 	const passwordChanged =
-	// 		editPasswordFlag &&
-	// 		currentPassword !== "" &&
-	// 		newPassword !== "" &&
-	// 		confirmPassword !== "" &&
-	// 		newPassword === confirmPassword &&
-	// 		newPassword.length >= minLength;
-
-	// 	if (!profileChanged && !passwordChanged) {
-	// 		console.log("No changes to save.");
-	// 		return; // Exit if there are no changes
-	// 	}
-
-	// 	if (editPasswordFlag && !passwordChanged) {
-	// 		console.error("Password validation failed. Please fix the errors.");
-	// 		return; // Exit if password validation fails
-	// 	}
-
-	// 	// Construct the request body
-	// 	const reqBody = {
-	// 		firstName: firstName,
-	// 		lastName: lastName,
-	// 		email: email,
-	// 		address: address,
-	// 	};
-
-	// 	if (passwordChanged) {
-	// 		console.log("Inside password changed");
-	// 		reqBody.current_password = currentPassword;
-	// 		reqBody.new_password = newPassword;
-	// 	}
-	// 	console.log("Request body: ", reqBody);
-
-	// 	setLoading(true);
-
-	// 	AxiosInstance.post(
-	// 		`${process.env.REACT_APP_DJANGO_API_URL}/api/profile/user-profile`,
-	// 		reqBody
-	// 	)
-	// 		.then((response) => {
-	// 			console.log(
-	// 				"Profile and/or password updated successfully",
-	// 				response.data
-	// 			);
-	// 			setLoading(false);
-	// 		})
-	// 		.catch((error) => {
-	// 			console.error("Error updating profile and/or password", error);
-	// 			setLoading(false);
-	// 		});
-	// 	// setTimeout(() => {
-	// 	// 	setLoading(false);
-	// 	// }, 4000);
-	// };
-
 	useEffect(() => {
-		const getUserProfile = async () => {
-			try {
-				const response = await AxiosInstance.get(
-					`${process.env.NEXT_PUBLIC_DJANGO_BASE_URL}/accounts/user/me`
-				);
-				const userProfile = response.data;
-				console.log("User Profile: ", userProfile);
-				setFirstName(userProfile.first_name);
-				setLastName(userProfile.last_name);
-				setEmail(userProfile.email);
-			} catch (error: any) {
-				console.error("Error fetching user profile:", error);
-				if (error.response.status === 401) {
-					// Handle unauthorized access, e.g., redirect to login
-					console.error("Unauthorized access. Redirecting to login.");
-					// window.location.href = "/login"; // Adjust the path as needed
-					// router to /login
-					router.push("/login");
-				}
-			}
-		};
+		const tokenValue = getToken();
+		if (tokenValue === null) {
+			console.error("Token is null. Redirecting to login.");
+			router.push("/login"); // Redirect to login if token is not available
+		}
 		getUserProfile();
 	}, []);
+
+	const handleSaveClick = () => {
+		// Check if there are changes in profile fields
+		const profileChanged =
+			firstName !== user?.first_name ||
+			lastName !== user?.last_name ||
+			email !== user?.email ||
+			address !== "Kingston, 5236, United State"; // Default address check
+
+		// Check if passwords are being edited and validate them
+		const passwordChanged =
+			editPasswordFlag &&
+			newPassword !== "" &&
+			confirmPassword !== "" &&
+			newPassword === confirmPassword &&
+			newPassword.length >= minLength;
+
+		if (!profileChanged && !passwordChanged) {
+			console.log("No changes to save.");
+			return; // Exit if there are no changes
+		}
+
+		if (editPasswordFlag && !passwordChanged) {
+			console.error("Password validation failed. Please fix the errors.");
+			return; // Exit if password validation fails
+		}
+
+		// Construct the request body
+		const reqBody: {
+			firstName: string;
+			lastName: string;
+			email: string;
+			address: string;
+			new_password?: string;
+		} = {
+			firstName: firstName,
+			lastName: lastName,
+			email: email,
+			address: address,
+		};
+
+		if (passwordChanged) {
+			console.log("Inside password changed");
+			reqBody["new_password"] = newPassword;
+		}
+		console.log("Request body: ", reqBody);
+
+		setLoading(true);
+
+		AxiosInstance.post(
+			`${process.env.NEXT_PUBLIC_DJANGO_BASE_URL}/accounts/user/me`,
+			reqBody
+		)
+			.then((response) => {
+				console.log(
+					"Profile and/or password updated successfully",
+					response.data
+				);
+				setLoading(false);
+			})
+			.catch((error) => {
+				if (error.response && error.response.status === 401) {
+					console.error("Unauthorized access. Redirecting to login.");
+					router.push("/login");
+					return;
+				}
+				console.error("Error updating profile and/or password", error);
+				setLoading(false);
+			});
+	};
+
+	const getUserProfile = async () => {
+		try {
+			const response = await AxiosInstance.get(
+				`${process.env.NEXT_PUBLIC_DJANGO_BASE_URL}/accounts/user/me`
+			);
+			const userProfile = response.data;
+			console.log("User Profile: ", userProfile);
+			setFirstName(userProfile.first_name);
+			setLastName(userProfile.last_name);
+			setEmail(userProfile.email);
+		} catch (error: any) {
+			console.error("Error fetching user profile:", error);
+			if (error.response && error.response.status === 401) {
+				console.error("Unauthorized access. Redirecting to login.");
+				router.push("/login");
+			}
+		}
+	};
 
 	return (
 		<div className="flex flex-1 justify-center self-center md:self-stretch">
@@ -239,25 +239,6 @@ function MyProfile({ user, profile }: MyProfileProps) {
 									/>
 								</Tooltip>
 							</Stack>
-							<Stack spacing={2} width={"100%"}>
-								<Input
-									fullWidth
-									type="password"
-									name="placeboxinfo"
-									placeholder={`Current Passwod`}
-									className="rounded px-3.5"
-									disabled={!editPasswordFlag}
-									value={currentPassword}
-									onChange={(event) => {
-										setCurrentPassword(event.target.value);
-										console.log(
-											"currentPassword: ",
-											currentPassword,
-											currentPassword.length
-										);
-									}}
-								/>
-							</Stack>
 						</div>
 						<Stack
 							spacing={0.5}
@@ -314,9 +295,9 @@ function MyProfile({ user, profile }: MyProfileProps) {
 												newPassword.length < 6 &&
 												"Weak"}
 											{newPassword.length >= 6 &&
-												newPassword.length < 10 &&
+												newPassword.length <= 10 &&
 												"Strong"}
-											{newPassword.length >= 10 && "Very strong"}
+											{newPassword.length > 10 && "Very strong"}
 										</Typography>
 									) : null}
 									<FormHelperText>
@@ -327,7 +308,7 @@ function MyProfile({ user, profile }: MyProfileProps) {
 													Password matches criteria!
 												</>
 											) : (
-												"Password length must be at least 12 characters and the bar should be green."
+												"Password length must be at least 10 characters and the bar should be green."
 											)
 										) : null}
 									</FormHelperText>
@@ -404,7 +385,7 @@ function MyProfile({ user, profile }: MyProfileProps) {
 									<></>
 								)
 							}
-							// onClick={handleSaveClick}
+							onClick={handleSaveClick}
 						>
 							{loading ? "Submitting..." : "Save Changes"}
 						</Button>
