@@ -108,7 +108,9 @@ function Footer() {
 					</div>
 				</div>
 			</section>
-			<p id={styles["copy-right-text"]}>© 2021 - All Rights Reserved</p>
+			<p id={styles["copy-right-text"]}>
+				© {new Date().getFullYear()} - All Rights Reserved
+			</p>
 		</footer>
 	);
 }

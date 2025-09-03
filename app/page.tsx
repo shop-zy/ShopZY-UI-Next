@@ -65,17 +65,17 @@ export default function Home() {
 	const categoryCards = [
 		{
 			name: "Phones",
-			icon: "/img/category-phone.svg",
+			icon: "/img/Category-CellPhone.svg",
 			link: "/category/phones",
 		},
 		{
 			name: "Computers",
-			icon: "/img/category-computer.svg",
+			icon: "/img/Category-Computer.svg",
 			link: "/category/computers",
 		},
 		{
 			name: "SmartWatch",
-			icon: "/img/category-smartwatch.svg",
+			icon: "/img/Category-SmartWatch.svg",
 			link: "/category/smartwatch",
 		},
 		{
@@ -85,12 +85,12 @@ export default function Home() {
 		},
 		{
 			name: "HeadPhones",
-			icon: "/img/category-headphones.svg",
-			link: "/category/headphones",
+			icon: "/img/Category-Headphone.svg",
+			link: "/category/Category-Headphones",
 		},
 		{
 			name: "Gaming",
-			icon: "/img/category-gaming.svg",
+			icon: "/img/Category-Gamepad.svg",
 			link: "/category/gaming",
 		},
 	];
